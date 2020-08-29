@@ -3,9 +3,15 @@
 
 # Group15: Alfonso D'Amelio, Claudia Colonna, Ufuk Caliskan
 
-# # Get the links of the songs
+import requests
+import pymongo
+from pymongo import MongoClient
+import codecs, json, requests
+from nltk.tokenize import RegexpTokenizer
+from bs4 import BeautifulSoup
+from nltk.corpus import stopwords
 
-# In[8]:
+## Get the links of the songs
 
 #read data e append in a list called song
 songs = []
@@ -17,30 +23,16 @@ for subdir, dirs, files in os.walk('/Users/alfonsodamelio/Desktop/lyrics_collect
             songs.append(filepath)
 
 
-# # Save data of songs
-
-# In[9]:
-
+## Save data of songs
 columns = ["URL", "Title", "Artist", "Lyrics"]
 
-
-# In[10]:
-
 #removing this from the stopwords we are able in the next chunk to delete all songs that are not english
-from nltk.corpus import stopwords
 remove = ["on", "s", "a", "d", "me", "o", "do"]
 eng=stopwords.words('english')
 for i in remove:
     if(i in eng):
         eng.remove(i)
 
-
-# In[12]:
-
-import codecs, json, requests
-from nltk.tokenize import RegexpTokenizer
-from bs4 import BeautifulSoup
-from nltk.corpus import stopwords
 result = []
 headers = {'content-type':'application/json'}
 url = "https://api.mlab.com/api/1/databases/azlyrics/collections/songs?apiKey=5DCSMLuBf6jq5qryUUWry2yW7nk1MQzT"
@@ -89,29 +81,17 @@ for song in songs:
         result.append(json_string)
     if len(result)==50000: #append in a list 50 thousand songs
         break
-    
-
-
-# In[20]:
 
 len(result)
 
+#uploading data on Mongodb with Pymongo
 
-# ### uploading data on Mongodb with Pymongo
-
-# In[21]:
-
-import requests
-import pymongo
-from pymongo import MongoClient
-uri='mongodb://Alfo7:alfo11295@ds117156.mlab.com:17156/azlyrics'
-client=MongoClient(uri)
-db=MongoClient(uri).get_database('azlyrics')
+uri = 'mongodb://Alfo7:alfo11295@ds117156.mlab.com:17156/azlyrics'
+client = MongoClient(uri)
+db = MongoClient(uri).get_database('azlyrics')
 db.authenticate('Alfo7','alfo11295')
-coll=db.songs
+coll = db.songs
 
-
-# In[22]:
 
 coll.insert_many(result)
 
